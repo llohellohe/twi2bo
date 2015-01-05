@@ -11,5 +11,6 @@ public class APIConstants {
     public static final String CONSUMER_SECRET="f3iBeNZVgqwT68y4lUNJydI8N7pGfzEMeTqoxtzB8hZIlk5ywo";
 
     public static final String ENCODING="utf-8";
+    public static final String CALLBACK_URL="http://www.hiyangqi.com";
 
 }
