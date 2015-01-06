@@ -1,5 +1,7 @@
 package yangqi.sns.twi2bo.api.sign;
 
+import yangqi.sns.twi2bo.api.APIConstants;
+import yangqi.sns.twi2bo.api.APIParameter;
 import yangqi.sns.twi2bo.api.APIUtils;
 
 import javax.crypto.Mac;
@@ -33,7 +35,6 @@ public class SignatureTool {
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < keySize; i++) {
             String ele = keyList.get(i);
-            System.out.println(ele);
             buffer.append(ele).append("=").append(percentMap.get(ele));
 
             if (i < keySize - 1) {
@@ -59,7 +60,7 @@ public class SignatureTool {
     }
 
 
-    public static String sign(String signKey, String data) {
+    public static String caculateSignature(String signKey, String data) {
         try {
             Mac mac = Mac.getInstance("HmacSHA1");
             SecretKeySpec secret = new SecretKeySpec(signKey.getBytes(), mac.getAlgorithm());
@@ -71,5 +72,22 @@ public class SignatureTool {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static String createOAuthHeader(APIParameter parameter){
+        StringBuffer oauthHeader=new StringBuffer();
+        oauthHeader.append("OAuth ");
+        oauthHeader.append(percentString("oauth_consumer_key")).append("=\"").append(percentString(parameter.getoAuthConsumerKey())).append("\", ");
+        oauthHeader.append(percentString("oauth_nonce")).append("=\"").append(percentString(parameter.getoAuthNonce())).append("\", ");
+        oauthHeader.append(percentString("oauth_signature")).append("=\"").append(percentString(parameter.getoAuthSignature())).append("\", ");
+        oauthHeader.append(percentString("oauth_signature_method")).append("=\"").append(percentString(APIConstants.HMAC_SHA1)).append("\", ");
+        oauthHeader.append(percentString("oauth_timestamp")).append("=\"").append(parameter.getTimestamp()).append("\", ");
+        oauthHeader.append(percentString("oauth_token")).append("=\"").append(percentString(parameter.getoAuthToken())).append("\", ");
+        oauthHeader.append(percentString("oauth_version")).append("=\"").append("1.0\"");
+        return oauthHeader.toString();
+    }
+
+    private static String percentString(String param){
+        return APIUtils.percentString(param);
     }
 }
