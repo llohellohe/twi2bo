@@ -37,7 +37,7 @@ public class APIInvokerTest {
     }
 
     @Test
-    public void testPostText() throws IOException {
+    public void testUpdateStatus() throws IOException {
         inovker.updateStatus("Ignore me !!! I am a test tweets "+System.currentTimeMillis());
     }
 
