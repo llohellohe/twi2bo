@@ -10,15 +10,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import yangqi.sns.twi2bo.api.sign.SignatureTool;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by yangqi on 1/3/15.
@@ -42,11 +40,66 @@ public class APIInvoker {
         httpclient.getConnectionManager().shutdown();
     }
 
+    public void postText(String tweets) throws IOException{
+        String oauthNonce="d354174b11fe76cc55af2fbf3c21eb9d";
+        String timeStamp=""+System.currentTimeMillis()/1000;
+
+        APIParameter parameter=new APIParameter();
+
+        parameter.setoAuthConsumerKey(APIConstants.CONSUMER_KEY);
+        parameter.setoAuthNonce(oauthNonce);
+        parameter.setTimestamp(timeStamp);
+        parameter.setoAuthToken(APIConstants.ACCESS_TOKEN);
+        parameter.setoAuthVersion("1.0");
+        parameter.setApiName("https://api.twitter.com/1.1/statuses/update.json");
+        parameter.setoAuthConsumerSecret(APIConstants.CONSUMER_SECRET);
+        parameter.setoAuthTokenSecret(APIConstants.ACCESS_TOKEN_SECRET);
+
+        Map<String, String> queryMap = new HashMap<>();
+        queryMap.put("status", tweets);
+        //queryMap.put("include_entities", "true");
+        queryMap.put("oauth_consumer_key", parameter.getoAuthConsumerKey());
+        queryMap.put("oauth_nonce", parameter.getoAuthNonce());
+        queryMap.put("oauth_signature_method", parameter.getoAuthSignatureMethod());
+        queryMap.put("oauth_timestamp", ""+parameter.getTimestamp());
+        queryMap.put("oauth_token", parameter.getoAuthToken());
+        queryMap.put("oauth_version", parameter.getoAuthVersion());
+
+        String collectParameter = SignatureTool.collectParameter(queryMap);
+        String baseSignString=SignatureTool.createSigatureBaseString("post", parameter.getApiName(), collectParameter);
+
+        String signatureKey=SignatureTool.createSigningKey(parameter.getoAuthConsumerSecret(), parameter.getoAuthTokenSecret());
+
+        String signature=SignatureTool.caculateSignature(signatureKey,baseSignString);
+        parameter.setoAuthSignature(signature);
+
+
+        String oauthHeader=SignatureTool.createOAuthHeader(parameter);
+
+        HttpPost httpPost = new HttpPost(APIConstants.API_SERVER + "/1.1/statuses/update.json");
+        httpPost.addHeader("Authorization",oauthHeader.toString());
+
+        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        nvps.add(new BasicNameValuePair("status", tweets));
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps));
+
+        HttpResponse response = httpclient.execute(httpPost);
+        HttpEntity entity = response.getEntity();
+        String result = convert2String(entity.getContent());
+
+
+        System.out.println("result is "+result);
+
+
+    }
+
     public void singInWithTwitter() throws IOException {
 
         HttpPost httpPost = new HttpPost(APIConstants.API_SERVER + "/oauth/request_token");
 
         String callbackUrl = URLEncoder.encode(APIConstants.CALLBACK_URL, APIConstants.ENCODING);
+
+        //String oauthSignature= SignatureTool
 
         httpPost.addHeader("Authorization", "OAuth oauth_callback=" + callbackUrl + "\noauth_consumer_key="
                                             + APIConstants.CONSUMER_KEY
