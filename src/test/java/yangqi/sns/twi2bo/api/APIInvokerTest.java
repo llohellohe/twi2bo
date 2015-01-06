@@ -38,7 +38,7 @@ public class APIInvokerTest {
 
     @Test
     public void testPostText() throws IOException {
-        inovker.postText("I am a test tweets "+System.currentTimeMillis());
+        inovker.updateStatus("Ignore me !!! I am a test tweets "+System.currentTimeMillis());
     }
 
 }

@@ -1,5 +1,8 @@
 package yangqi.sns.twi2bo.api;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by yangqi on 1/6/15.
  */
@@ -9,14 +12,17 @@ public class APIParameter {
     private String oAuthNonce;
     private String oAuthSignature;
     private String oAuthSignatureKey;
-    private String oAuthSignatureMethod="HMAC-SHA1";
+    private String oAuthSignatureMethod = "HMAC-SHA1";
     private String timestamp;
     private String oAuthToken;
-    private String oAuthVersion="1.0";
+    private String oAuthVersion = "1.0";
 
     private String oAuthTokenSecret;
 
     private String apiName;
+    private String apiHttpMethod;
+
+    private Map<String, String> fieldMap = new HashMap<>();
 
     public String getoAuthConsumerKey() {
         return oAuthConsumerKey;
@@ -104,5 +110,26 @@ public class APIParameter {
 
     public void setoAuthConsumerSecret(String oAuthConsumerSecret) {
         this.oAuthConsumerSecret = oAuthConsumerSecret;
+    }
+
+
+    public Map<String, String> getFieldMap() {
+        return fieldMap;
+    }
+
+    public void setFieldMap(Map<String, String> fieldMap) {
+        this.fieldMap = fieldMap;
+    }
+
+    public void addField(String filedName,String fieldValue){
+        fieldMap.put(filedName,fieldValue);
+    }
+
+    public String getApiHttpMethod() {
+        return apiHttpMethod;
+    }
+
+    public void setApiHttpMethod(String apiHttpMethod) {
+        this.apiHttpMethod = apiHttpMethod;
     }
 }

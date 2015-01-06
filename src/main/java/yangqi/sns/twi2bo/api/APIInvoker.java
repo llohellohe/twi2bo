@@ -40,7 +40,7 @@ public class APIInvoker {
         httpclient.getConnectionManager().shutdown();
     }
 
-    public void postText(String tweets) throws IOException{
+    public void updateStatus(String tweets) throws IOException{
         String oauthNonce="d354174b11fe76cc55af2fbf3c21eb9d";
         String timeStamp=""+System.currentTimeMillis()/1000;
 
@@ -54,25 +54,12 @@ public class APIInvoker {
         parameter.setApiName("https://api.twitter.com/1.1/statuses/update.json");
         parameter.setoAuthConsumerSecret(APIConstants.CONSUMER_SECRET);
         parameter.setoAuthTokenSecret(APIConstants.ACCESS_TOKEN_SECRET);
+        parameter.setApiHttpMethod("post");
+        parameter.addField("status",tweets);
 
-        Map<String, String> queryMap = new HashMap<>();
-        queryMap.put("status", tweets);
-        //queryMap.put("include_entities", "true");
-        queryMap.put("oauth_consumer_key", parameter.getoAuthConsumerKey());
-        queryMap.put("oauth_nonce", parameter.getoAuthNonce());
-        queryMap.put("oauth_signature_method", parameter.getoAuthSignatureMethod());
-        queryMap.put("oauth_timestamp", ""+parameter.getTimestamp());
-        queryMap.put("oauth_token", parameter.getoAuthToken());
-        queryMap.put("oauth_version", parameter.getoAuthVersion());
+        String signature=SignatureTool.createRequestSignature(parameter);
 
-        String collectParameter = SignatureTool.collectParameter(queryMap);
-        String baseSignString=SignatureTool.createSigatureBaseString("post", parameter.getApiName(), collectParameter);
-
-        String signatureKey=SignatureTool.createSigningKey(parameter.getoAuthConsumerSecret(), parameter.getoAuthTokenSecret());
-
-        String signature=SignatureTool.caculateSignature(signatureKey,baseSignString);
         parameter.setoAuthSignature(signature);
-
 
         String oauthHeader=SignatureTool.createOAuthHeader(parameter);
 

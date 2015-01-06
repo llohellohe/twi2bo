@@ -74,6 +74,33 @@ public class SignatureTool {
         return null;
     }
 
+
+    public static String createRequestSignature(APIParameter parameter){
+        Map<String, String> queryMap = new HashMap<>();
+        for(Map.Entry<String,String> entry:parameter.getFieldMap().entrySet()){
+           queryMap.put(entry.getKey(),entry.getValue());
+        }
+        //queryMap.put("include_entities", "true");
+        queryMap.put("oauth_consumer_key", parameter.getoAuthConsumerKey());
+        queryMap.put("oauth_nonce", parameter.getoAuthNonce());
+        queryMap.put("oauth_signature_method", parameter.getoAuthSignatureMethod());
+        queryMap.put("oauth_timestamp", ""+parameter.getTimestamp());
+        queryMap.put("oauth_token", parameter.getoAuthToken());
+        queryMap.put("oauth_version", parameter.getoAuthVersion());
+
+
+        String collectParameter = SignatureTool.collectParameter(queryMap);
+        String baseSignString=SignatureTool.createSigatureBaseString(parameter.getApiHttpMethod(), parameter.getApiName(), collectParameter);
+
+        String signatureKey=SignatureTool.createSigningKey(parameter.getoAuthConsumerSecret(), parameter.getoAuthTokenSecret());
+
+        String signature=SignatureTool.caculateSignature(signatureKey,baseSignString);
+
+        return signature;
+
+
+    }
+
     public static String createOAuthHeader(APIParameter parameter){
         StringBuffer oauthHeader=new StringBuffer();
         oauthHeader.append("OAuth ");
