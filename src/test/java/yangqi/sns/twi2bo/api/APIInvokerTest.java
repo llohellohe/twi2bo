@@ -36,4 +36,9 @@ public class APIInvokerTest {
         inovker.singInWithTwitter();
     }
 
+    @Test
+    public void testPostText() throws IOException {
+        inovker.postText("I am a test tweets "+System.currentTimeMillis());
+    }
+
 }
