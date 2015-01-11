@@ -10,7 +10,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
-import yangqi.sns.twi2bo.api.sign.SignatureTool;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,30 +40,19 @@ public class APIInvoker {
     }
 
     public void updateStatus(String tweets) throws IOException{
-        String oauthNonce="d354174b11fe76cc55af2fbf3c21eb9d";
-        String timeStamp=""+System.currentTimeMillis()/1000;
 
-        APIParameter parameter=new APIParameter();
+        TwitterOAuth twitterOAuth=new TwitterOAuth(APIConstants.CONSUMER_KEY,APIConstants.CONSUMER_SECRET,APIConstants.ACCESS_TOKEN,APIConstants.ACCESS_TOKEN_SECRET);
 
-        parameter.setoAuthConsumerKey(APIConstants.CONSUMER_KEY);
-        parameter.setoAuthNonce(oauthNonce);
-        parameter.setTimestamp(timeStamp);
-        parameter.setoAuthToken(APIConstants.ACCESS_TOKEN);
-        parameter.setoAuthVersion("1.0");
-        parameter.setApiName("https://api.twitter.com/1.1/statuses/update.json");
-        parameter.setoAuthConsumerSecret(APIConstants.CONSUMER_SECRET);
-        parameter.setoAuthTokenSecret(APIConstants.ACCESS_TOKEN_SECRET);
-        parameter.setApiHttpMethod("post");
-        parameter.addField("status",tweets);
+        Map<String,String> parameters=new HashMap<>();
+        parameters.put("status",tweets);
 
-        String signature=SignatureTool.createRequestSignature(parameter);
+        twitterOAuth.buildRequest("https://api.twitter.com/1.1/statuses/update.json","post",parameters);
 
-        parameter.setoAuthSignature(signature);
-
-        String oauthHeader=SignatureTool.createOAuthHeader(parameter);
+        String oauthHeader=twitterOAuth.getRequest().buildAuthorizationHeader();
+        System.out.println("HEADER is "+oauthHeader);
 
         HttpPost httpPost = new HttpPost(APIConstants.API_SERVER + "/1.1/statuses/update.json");
-        httpPost.addHeader("Authorization",oauthHeader.toString());
+        httpPost.addHeader("Authorization",oauthHeader);
 
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         nvps.add(new BasicNameValuePair("status", tweets));
@@ -82,29 +70,28 @@ public class APIInvoker {
 
     public void singInWithTwitter() throws IOException {
 
-        HttpPost httpPost = new HttpPost(APIConstants.API_SERVER + "/oauth/request_token");
 
-        String callbackUrl = URLEncoder.encode(APIConstants.CALLBACK_URL, APIConstants.ENCODING);
+        TwitterOAuth twitterOAuth=new TwitterOAuth(APIConstants.CONSUMER_KEY,APIConstants.CONSUMER_SECRET);
 
-        //String oauthSignature= SignatureTool
 
-        httpPost.addHeader("Authorization", "OAuth oauth_callback=" + callbackUrl + "\noauth_consumer_key="
-                                            + APIConstants.CONSUMER_KEY
-                                            + "\noauth_nonce=ea9ec8429b68d6b77cd5600adbbb0456"
-                                            + "\noauth_signature=ea9ec8429b68d6b77cd5600adbbb0456"
-                                            + "\noauth_signature_method=HMAC-SHA1"
-                                            + "\noauth_timestamp="+System.currentTimeMillis()
-                                            + "\noauth_version=1.0"
-        );
+        Map<String, String> queryMap = new HashMap<>();
+        //queryMap.put("oauth_callback",APIConstants.CALLBACK_URL);
+        queryMap.put("oauth_callback",APIConstants.CALLBACK_URL);
 
-       // List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        //nvps.add(new BasicNameValuePair("oauth_callback", callbackUrl));
-        //httpPost.setEntity(new UrlEncodedFormEntity(nvps));
-        HttpResponse response = httpclient.execute(httpPost);
+        twitterOAuth.buildRequest("https://api.twitter.com/oauth/request_token", "get", queryMap);
+
+
+        String getQuery=twitterOAuth.getRequest().buildGetQuery();
+        System.out.println(getQuery);
+
+        HttpGet httpGet = new HttpGet(APIConstants.API_SERVER + "/oauth/request_token?"+getQuery);
+
+
+        HttpResponse response = httpclient.execute(httpGet);
         HttpEntity entity = response.getEntity();
         String result = convert2String(entity.getContent());
 
-        System.out.println(System.currentTimeMillis()/1000+"result is "+result);
+        System.out.println("result is "+result);
 
     }
 
