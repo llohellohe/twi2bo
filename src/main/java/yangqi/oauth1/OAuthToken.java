@@ -28,4 +28,12 @@ public class OAuthToken {
     public void setTokenSecret(String tokenSecret) {
         this.tokenSecret = tokenSecret;
     }
+
+    @Override
+    public String toString() {
+        return "OAuthToken{" +
+               "token='" + token + '\'' +
+               ", tokenSecret='" + tokenSecret + '\'' +
+               '}';
+    }
 }

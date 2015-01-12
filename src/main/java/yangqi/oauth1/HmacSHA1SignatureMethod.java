@@ -22,7 +22,6 @@ public class HmacSHA1SignatureMethod implements OAuthSignatureMethod{
         String baseString=request.getSignatureBaseString();
         String signKey=createSigningKey(consumer,token);
 
-        System.out.println("===SIgn KEY IS===="+signKey);
 
         try {
             Mac mac = Mac.getInstance("HmacSHA1");

@@ -68,33 +68,6 @@ public class APIInvoker {
 
     }
 
-    public void singInWithTwitter() throws IOException {
-
-
-        TwitterOAuth twitterOAuth=new TwitterOAuth(APIConstants.CONSUMER_KEY,APIConstants.CONSUMER_SECRET);
-
-
-        Map<String, String> queryMap = new HashMap<>();
-        //queryMap.put("oauth_callback",APIConstants.CALLBACK_URL);
-        queryMap.put("oauth_callback",APIConstants.CALLBACK_URL);
-
-        twitterOAuth.buildRequest("https://api.twitter.com/oauth/request_token", "get", queryMap);
-
-
-        String getQuery=twitterOAuth.getRequest().buildGetQuery();
-        System.out.println(getQuery);
-
-        HttpGet httpGet = new HttpGet(APIConstants.API_SERVER + "/oauth/request_token?"+getQuery);
-
-
-        HttpResponse response = httpclient.execute(httpGet);
-        HttpEntity entity = response.getEntity();
-        String result = convert2String(entity.getContent());
-
-        System.out.println("result is "+result);
-
-    }
-
     private String getBearTokenJson(String apiName) throws IOException {
         HttpPost httpPost = new HttpPost(APIConstants.API_SERVER + apiName);
 

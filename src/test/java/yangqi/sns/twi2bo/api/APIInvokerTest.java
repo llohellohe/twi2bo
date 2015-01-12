@@ -32,11 +32,6 @@ public class APIInvokerTest {
     }
 
     @Test
-    public void testSignIn() throws IOException {
-        inovker.singInWithTwitter();
-    }
-
-    @Test
     public void testUpdateStatus() throws IOException {
         inovker.updateStatus("Ignore me !!! I am a test tweets "+System.currentTimeMillis());
     }
